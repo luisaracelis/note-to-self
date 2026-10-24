@@ -60,10 +60,14 @@ textarea:focus {
   background: white;
 }
 
-button {
-  display: block;
-  width: 100%;
+.button-row {
+  display: flex;
+  gap: 0.6rem;
   margin-top: 0.75rem;
+}
+
+button {
+  flex: 1;
   padding: 0.9rem;
   font-size: 1.05rem;
   font-weight: 600;
@@ -78,8 +82,27 @@ button.primary {
   color: white;
 }
 
-button.primary:active {
+button.secondary {
+  background: #e8e8e8;
+  color: #333;
+}
+
+button.listening {
+  background: #c45c5c;
+  color: white;
+  animation: pulse 1.5s infinite;
+}
+
+button:active {
   transform: scale(0.98);
+}
+
+.status {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 0.5rem;
+  min-height: 1.2em;
+  text-align: center;
 }
 
 .ideas h2 {
@@ -127,6 +150,11 @@ button.primary:active {
   color: #999;
   padding: 2rem 1rem;
   font-style: italic;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
 @media (min-width: 500px) {

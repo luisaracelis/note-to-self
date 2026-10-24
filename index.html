@@ -15,8 +15,12 @@
   </header>
 
   <form id="ideaForm">
-    <textarea id="ideaText" placeholder="What's the idea? Just type it..." rows="4" required></textarea>
-    <button type="submit" class="primary">Save idea</button>
+    <textarea id="ideaText" placeholder="What's the idea? Type or tap Dictate..." rows="4" required></textarea>
+    <div class="button-row">
+      <button type="button" id="dictateBtn" class="secondary">🎙️ Dictate</button>
+      <button type="submit" class="primary">Save idea</button>
+    </div>
+    <p id="status" class="status"></p>
   </form>
 
   <section id="ideasList" class="ideas">

@@ -1,4 +1,7 @@
 const STORAGE_KEY = 'noteToSelfIdeas';
+const textarea = document.getElementById('ideaText');
+const dictateBtn = document.getElementById('dictateBtn');
+const statusEl = document.getElementById('status');
 
 function loadIdeas() {
   try {
@@ -34,7 +37,7 @@ function renderIdeas() {
   container.innerHTML = ideas
     .slice()
     .reverse()
-    .map((idea, i) => `
+    .map((idea) => `
       <div class="idea" data-id="${idea.id}">
         <div class="idea-text">${escapeHtml(idea.text)}</div>
         <div class="idea-meta">
@@ -44,7 +47,6 @@ function renderIdeas() {
       </div>
     `).join('');
 
-  // Attach delete handlers
   container.querySelectorAll('.delete-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const id = btn.dataset.id;
@@ -63,9 +65,80 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+// Speech recognition
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+let isListening = false;
+
+if (SpeechRecognition) {
+  recognition = new SpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+
+  recognition.onstart = () => {
+    isListening = true;
+    dictateBtn.textContent = '🛑 Stop';
+    dictateBtn.classList.add('listening');
+    statusEl.textContent = 'Listening… speak now';
+  };
+
+  recognition.onend = () => {
+    isListening = false;
+    dictateBtn.textContent = '🎙️ Dictate';
+    dictateBtn.classList.remove('listening');
+    statusEl.textContent = '';
+  };
+
+  recognition.onerror = (e) => {
+    console.error(e);
+    statusEl.textContent = e.error === 'not-allowed' ? 'Mic permission denied' : 'Could not hear you — try again';
+    isListening = false;
+    dictateBtn.textContent = '🎙️ Dictate';
+    dictateBtn.classList.remove('listening');
+  };
+
+  recognition.onresult = (event) => {
+    let finalTranscript = '';
+    let interim = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        finalTranscript += transcript + ' ';
+      } else {
+        interim += transcript;
+      }
+    }
+    if (finalTranscript) {
+      const current = textarea.value.trim();
+      textarea.value = current ? current + ' ' + finalTranscript.trim() : finalTranscript.trim();
+    }
+    // Optional: show interim in status
+    if (interim) {
+      statusEl.textContent = 'Listening… ' + interim;
+    }
+  };
+
+  dictateBtn.addEventListener('click', () => {
+    if (isListening) {
+      recognition.stop();
+    } else {
+      try {
+        recognition.start();
+      } catch (err) {
+        statusEl.textContent = 'Mic already active or not available';
+      }
+    }
+  });
+} else {
+  dictateBtn.disabled = true;
+  dictateBtn.textContent = 'Dictate (not supported)';
+  statusEl.textContent = 'Voice input works best in Chrome or Safari';
+}
+
 document.getElementById('ideaForm').addEventListener('submit', (e) => {
   e.preventDefault();
-  const text = document.getElementById('ideaText').value.trim();
+  const text = textarea.value.trim();
   if (!text) return;
 
   const ideas = loadIdeas();
@@ -76,7 +149,7 @@ document.getElementById('ideaForm').addEventListener('submit', (e) => {
   });
   saveIdeas(ideas);
 
-  document.getElementById('ideaText').value = '';
+  textarea.value = '';
   renderIdeas();
 });
 
