@@ -2,6 +2,7 @@ const STORAGE_KEY = 'noteToSelfIdeas';
 const textarea = document.getElementById('ideaText');
 const dictateBtn = document.getElementById('dictateBtn');
 const statusEl = document.getElementById('status');
+const askGrokBtn = document.getElementById('askGrokBtn');
 
 function loadIdeas() {
   try {
@@ -28,6 +29,8 @@ function formatDate(ts) {
 function renderIdeas() {
   const container = document.getElementById('ideasContainer');
   const ideas = loadIdeas();
+
+  askGrokBtn.disabled = ideas.length === 0;
 
   if (ideas.length === 0) {
     container.innerHTML = '<div class="empty">No ideas yet. Dump the first one above.</div>';
@@ -64,6 +67,30 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 }
+
+// Ask Grok button
+askGrokBtn.addEventListener('click', async () => {
+  const ideas = loadIdeas();
+  if (ideas.length === 0) return;
+
+  const list = ideas
+    .map((idea, i) => `${i + 1}. ${idea.text}`)
+    .join('\n');
+
+  const prompt = `Here are my app ideas:\n\n${list}\n\nPlease review them and pick the 2 that are most feasible to create as simple web apps. Explain why those two, and briefly note why the others are less practical right now.`;
+
+  try {
+    await navigator.clipboard.writeText(prompt);
+    const original = askGrokBtn.textContent;
+    askGrokBtn.textContent = 'Copied! Paste in Grok';
+    setTimeout(() => {
+      askGrokBtn.textContent = original;
+    }, 2000);
+  } catch (err) {
+    // Fallback: show the prompt in an alert or prompt
+    prompt('Copy this and paste it into Grok:', prompt);
+  }
+});
 
 // Speech recognition
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -113,7 +140,6 @@ if (SpeechRecognition) {
       const current = textarea.value.trim();
       textarea.value = current ? current + ' ' + finalTranscript.trim() : finalTranscript.trim();
     }
-    // Optional: show interim in status
     if (interim) {
       statusEl.textContent = 'Listening… ' + interim;
     }
