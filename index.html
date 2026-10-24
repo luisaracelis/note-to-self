@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Note to Self — App Ideas</title>
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Note to Self</h1>
+    <p class="subtitle">Dump the app idea before it escapes.</p>
+  </header>
+
+  <form id="ideaForm">
+    <textarea id="ideaText" placeholder="What's the idea? Just type it..." rows="4" required></textarea>
+    <button type="submit" class="primary">Save idea</button>
+  </form>
+
+  <section id="ideasList" class="ideas">
+    <h2>Your ideas</h2>
+    <div id="ideasContainer"></div>
+  </section>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
